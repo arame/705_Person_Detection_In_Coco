@@ -6,7 +6,6 @@ import torchvision.transforms as transforms
 import torchvision.datasets as dset
 import time
 from torch.utils import data
-from tqdm import tqdm
 from config import Hyper, Constants
 from coco_data import COCO, COCOData
 import os
