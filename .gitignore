@@ -12,3 +12,4 @@ node_modules
 *.xml
 *.js
 *.log
+*.pkl
