@@ -1,6 +1,8 @@
 import torch as T
 import torchvision as TV
 import numpy as np
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 from utils import checkfolders
 from config import Hyper, Constants
 from train import train
