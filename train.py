@@ -2,8 +2,6 @@ import torch as T
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
-import torchvision.transforms as transforms
-import torchvision.datasets as dset
 import time
 from torch.utils import data
 from config import Hyper, Constants
@@ -45,7 +43,7 @@ def train():
     step = 0
     # initilze model, loss, etc
     fasterrcnn_args = {'num_classes':81, 'min_size':512, 'max_size':800}
-    fasterrcnn_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=False,**fasterrcnn_args)
+    fasterrcnn_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=False,**fasterrcnn_args, aux_logits = False)
     print(fasterrcnn_model)
     fasterrcnn_model = fasterrcnn_model.to(Constants.device)
     fasterrcnn_optimizer_pars = {'lr':Hyper.learning_rate}
@@ -73,9 +71,23 @@ def train():
         # but prints a dynamically updating progressbar every time a value is requested.
 
         #for _, b in tqdm(enumerate(coco_dataloader), total=len(coco_dataloader), leave=False):
+        step = 0
         for _, b in enumerate(coco_dataloader):
             fasterrcnn_optimizer.zero_grad()
             X,y = b
+            # There was a problem with bounding boxes
+            # Images with invalid bounding boxes need to be filtered out
+            # See https://discuss.pytorch.org/t/unexpected-data-error-in-the-ms-coco-dataset-valueerror-all-bounding-boxes-should-have-positive-height-and-width/115091
+            boxes = y['boxes'].squeeze_(0)
+            length = len(boxes)
+            for j in range(length):
+                if boxes[j][0] == boxes[j][2] or boxes[j][1] == boxes[j][3]:
+                    print(f"invalid bounding box has either no width or no height ({boxes[j][0]}, {boxes[j][1]}), ({boxes[j][2]}, {boxes[j][3]}).")
+                    continue    # Ignore images where the bounding box has no width or height
+
+            step += 1
+            if step % 100 == 0:
+                print(f"step: {step}")
             if Constants.device==T.device('cuda'):
                 X = X.to(Constants.device)
                 y['labels'] = y['labels'].to(Constants.device)
@@ -87,7 +99,7 @@ def train():
             # get rid of the first dimension (batch)
             # IF you have >1 images, make another loop
             # REPEAT: DO NOT USE BATCH DIMENSION 
-            # Pytorch is sensitive to formats. Labels must be int64, bboxes float32, masks uint8
+            # Pytorch is sensitive to formats. Labels must be int64, bboxes float32
             lab['boxes'] = y['boxes'].squeeze_(0)
             lab['labels'] = y['labels'].squeeze_(0)
             targets.append(lab)
