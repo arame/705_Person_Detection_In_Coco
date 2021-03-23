@@ -16,7 +16,7 @@ def main():
     checkfolders()
     train()
     print("-"*100)
-    train()
+    #train()
 
     print("\n"*5)  
     print("-"*100)
