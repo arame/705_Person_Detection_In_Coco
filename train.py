@@ -113,7 +113,7 @@ def train():
 
 
 def check_if_target_bbox_degenerate(targets):
-    if targets is not None:
+    if targets is None:
         for target_idx, target in enumerate(targets):
             boxes = target["boxes"]
             degenerate_boxes = None
