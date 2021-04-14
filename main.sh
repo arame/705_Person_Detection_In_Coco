@@ -10,6 +10,6 @@
 #SBATCH --partition=normal
 #SBATCH --gres=gpu:1
 
-module load python/3.7.9
+module load python/3.6.12
 
 python main.py

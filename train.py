@@ -7,11 +7,11 @@ from torch.utils import data
 from config import Hyper, Constants
 from coco_data import COCO, COCOData
 import os
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 from utils import load_checkpoint, save_checkpoint
 
 
 def train():
-    os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
     ###################### load COCO interface, the input is a json file with annotations ####################
     file_path = os.path.join(Constants.data_folder, Constants.images_train_file)
     coco_interface = COCO(file_path)
@@ -45,13 +45,9 @@ def train():
     coco_dataloader = data.DataLoader(coco_data, **coco_dataloader_args)
     step = 0
     # initilze model, loss, etc
-<<<<<<< HEAD
+    # , aux_logits = False
     fasterrcnn_args = {'num_classes':81, 'min_size':512, 'max_size':800}
-    fasterrcnn_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=False,**fasterrcnn_args, aux_logits = False)
-=======
-    fasterrcnn_args = {'num_classes': 81, 'min_size': 512, 'max_size': 800}
-    fasterrcnn_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=False, **fasterrcnn_args)
->>>>>>> 23b32dfd71c576043b66fb8a5e390c4e63573440
+    fasterrcnn_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=False,**fasterrcnn_args)
     print(fasterrcnn_model)
     fasterrcnn_model = fasterrcnn_model.to(Constants.device)
     fasterrcnn_optimizer_pars = {'lr': Hyper.learning_rate}
@@ -73,37 +69,14 @@ def train():
             }
             save_checkpoint(checkpoint)
 
-<<<<<<< HEAD
-
-        # tqdm - Decorate an iterable object, 
-        # returning an iterator which acts exactly like the original iterable, 
-        # but prints a dynamically updating progressbar every time a value is requested.
-
-        #for _, b in tqdm(enumerate(coco_dataloader), total=len(coco_dataloader), leave=False):
         step = 0
         for _, b in enumerate(coco_dataloader):
             fasterrcnn_optimizer.zero_grad()
             X,y = b
-            # There was a problem with bounding boxes
-            # Images with invalid bounding boxes need to be filtered out
-            # See https://discuss.pytorch.org/t/unexpected-data-error-in-the-ms-coco-dataset-valueerror-all-bounding-boxes-should-have-positive-height-and-width/115091
-            boxes = y['boxes'].squeeze_(0)
-            length = len(boxes)
-            for j in range(length):
-                if boxes[j][0] == boxes[j][2] or boxes[j][1] == boxes[j][3]:
-                    print(f"invalid bounding box has either no width or no height ({boxes[j][0]}, {boxes[j][1]}), ({boxes[j][2]}, {boxes[j][3]}).")
-                    continue    # Ignore images where the bounding box has no width or height
-
             step += 1
             if step % 100 == 0:
                 print(f"step: {step}")
             if Constants.device==T.device('cuda'):
-=======
-        for _, b in enumerate(coco_dataloader):
-            fasterrcnn_optimizer.zero_grad()
-            X, y = b
-            if Constants.device == T.device('cuda'):
->>>>>>> 23b32dfd71c576043b66fb8a5e390c4e63573440
                 X = X.to(Constants.device)
                 y['labels'] = y['labels'].to(Constants.device)
                 y['boxes'] = y['boxes'].to(Constants.device)
@@ -114,13 +87,9 @@ def train():
             # get rid of the first dimension (batch)
             # IF you have >1 images, make another loop
             # REPEAT: DO NOT USE BATCH DIMENSION 
-<<<<<<< HEAD
             # Pytorch is sensitive to formats. Labels must be int64, bboxes float32
             lab['boxes'] = y['boxes'].squeeze_(0)
             lab['labels'] = y['labels'].squeeze_(0)
-=======
-            # Pytorch is sensitive to formats. Labels must be int64, bboxes float32, masks uint8
->>>>>>> 23b32dfd71c576043b66fb8a5e390c4e63573440
             targets.append(lab)
             is_bb_degenerate = check_if_target_bbox_degenerate(targets)
             if is_bb_degenerate:
@@ -147,11 +116,15 @@ def check_if_target_bbox_degenerate(targets):
     if targets is not None:
         for target_idx, target in enumerate(targets):
             boxes = target["boxes"]
+            degenerate_boxes = None
+            if len(boxes) == 4:
+                return True
+
             degenerate_boxes = boxes[:, 2:] <= boxes[:, :2]
             if degenerate_boxes.any():
                 # print the first degenerate box
-                bb_idx = torch.where(degenerate_boxes.any(dim=1))[0][0]
-                degen_bb: List[float] = boxes[bb_idx].tolist()
+                bb_idx = T.where(degenerate_boxes.any(dim=1))[0][0]
+                degen_bb = boxes[bb_idx].tolist()
                 print("All bounding boxes should have positive height and width.")
                 print(f"Found invalid box {degen_bb} for target at index {target_idx}.")
                 return True
