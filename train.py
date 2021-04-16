@@ -46,8 +46,8 @@ def train():
     step = 0
     # initilze model, loss, etc
     # , aux_logits = False
-    fasterrcnn_args = {'num_classes':81, 'min_size':512, 'max_size':800}
-    fasterrcnn_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=False,**fasterrcnn_args)
+    fasterrcnn_args = {'num_classes':91, 'min_size':512, 'max_size':800}
+    fasterrcnn_model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True,**fasterrcnn_args)
     print(fasterrcnn_model)
     fasterrcnn_model = fasterrcnn_model.to(Constants.device)
     fasterrcnn_optimizer_pars = {'lr': Hyper.learning_rate}
@@ -56,26 +56,22 @@ def train():
     if Constants.load_model:
         step = load_checkpoint(fasterrcnn_model, fasterrcnn_optimizer)
 
-    fasterrcnn_model.train()  # Set model to training mode
-    start_time = time.time()
-    for epoch in range(Hyper.total_epochs):
+    epoch = 0
+    total_steps = 0
+    for _ in range(Hyper.total_epochs):
+        fasterrcnn_model.train()  # Set model to training mode
+        epoch += 1
         epoch_loss = 0
-        print(f"Epoch: {epoch + 1}")
-        if Constants.save_model:
-            checkpoint = {
-                "state_dict": fasterrcnn_model.state_dict(),
-                "optimizer": fasterrcnn_optimizer.state_dict(),
-                "step": step,
-            }
-            save_checkpoint(checkpoint)
-
+        start_time = time.strftime('%Y/%m/%d %H:%M:%S')
+        print(f"{start_time} Starting epoch: {epoch}")
         step = 0
         for _, b in enumerate(coco_dataloader):
             fasterrcnn_optimizer.zero_grad()
             X,y = b
             step += 1
+            total_steps += 1
             if step % 100 == 0:
-                print(f"step: {step}")
+                print(f"-- epoch {epoch}, step: {step}")
             if Constants.device==T.device('cuda'):
                 X = X.to(Constants.device)
                 y['labels'] = y['labels'].to(Constants.device)
@@ -105,12 +101,14 @@ def train():
                 total_loss.backward()
                 fasterrcnn_optimizer.step()
         epoch_loss = epoch_loss / len(coco_dataloader)
-        print("Loss in epoch {0:d} = {1:.3f}".format(epoch, epoch_loss))
+        print(f"Loss in epoch {epoch} = {epoch_loss}")
         fasterrcnn_model.eval()
         if Constants.save_model:
-            print(f"Save model for epoch {epoch + 1}")
+            print(f"Save model for epoch {epoch}")
             save_checkpoint(fasterrcnn_model)
 
+    end_time = time.strftime('%Y/%m/%d %H:%M:%S')
+    print(f"Training end time: {end_time}")
 
 def check_if_target_bbox_degenerate(targets):
 
