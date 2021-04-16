@@ -71,7 +71,8 @@ def train():
             step += 1
             total_steps += 1
             if step % 100 == 0:
-                print(f"-- epoch {epoch}, step: {step}")
+                curr_time = time.strftime('%Y/%m/%d %H:%M:%S')
+                print(f"-- {curr_time} epoch {epoch}, step: {step}")
             if Constants.device==T.device('cuda'):
                 X = X.to(Constants.device)
                 y['labels'] = y['labels'].to(Constants.device)
