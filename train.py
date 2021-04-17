@@ -112,7 +112,7 @@ def train():
             print(f"Save model for epoch {epoch}")
             checkpoint = {'epoch': epoch, 
                         "model_state_dict": fasterrcnn_model.state_dict(), 
-                        "optimizer_state_dict": optim.state_dict()
+                        "optimizer_state_dict": fasterrcnn_optimizer.state_dict(),
                         "loss": epoch_loss}
             save_checkpoint(checkpoint)
 
