@@ -4,7 +4,7 @@ import torch.optim as optim
 import torchvision
 import time
 from torch.utils import data
-from config import Hyper, Constants
+from config import Hyper, Constants, Global_Variable
 from coco_data import COCO, COCOData
 import os
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -54,12 +54,14 @@ def train():
     fasterrcnn_optimizer = optim.Adam(list(fasterrcnn_model.parameters()), **fasterrcnn_optimizer_pars)
     #####################################################################
     if Constants.load_model:
-        step = load_checkpoint(fasterrcnn_model, fasterrcnn_optimizer)
-
-    epoch = 0
+        epoch = load_checkpoint(fasterrcnn_model, fasterrcnn_optimizer)
+    else:
+        epoch = 0
     total_steps = 0
+    step_loss = 0
     for _ in range(Hyper.total_epochs):
         fasterrcnn_model.train()  # Set model to training mode
+        Global_Variable.is_train = True
         epoch += 1
         epoch_loss = 0
         start_time = time.strftime('%Y/%m/%d %H:%M:%S')
@@ -72,7 +74,7 @@ def train():
             total_steps += 1
             if step % 100 == 0:
                 curr_time = time.strftime('%Y/%m/%d %H:%M:%S')
-                print(f"-- {curr_time} epoch {epoch}, step: {step}")
+                print(f"-- {curr_time} epoch {epoch}, step: {step}, loss: {step_loss}")
             if Constants.device==T.device('cuda'):
                 X = X.to(Constants.device)
                 y['labels'] = y['labels'].to(Constants.device)
@@ -98,15 +100,21 @@ def train():
                 for k in loss.keys():
                     total_loss += loss[k]
 
+                step_loss = total_loss.item()
                 epoch_loss += total_loss.item()
                 total_loss.backward()
                 fasterrcnn_optimizer.step()
         epoch_loss = epoch_loss / len(coco_dataloader)
         print(f"Loss in epoch {epoch} = {epoch_loss}")
         fasterrcnn_model.eval()
+        Global_Variable.is_train = False
         if Constants.save_model:
             print(f"Save model for epoch {epoch}")
-            save_checkpoint(fasterrcnn_model)
+            checkpoint = {'epoch': epoch, 
+                        "model_state_dict": fasterrcnn_model.state_dict(), 
+                        "optimizer_state_dict": optim.state_dict()
+                        "loss": epoch_loss}
+            save_checkpoint(checkpoint)
 
     end_time = time.strftime('%Y/%m/%d %H:%M:%S')
     print(f"Training end time: {end_time}")

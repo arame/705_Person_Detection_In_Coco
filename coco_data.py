@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import pycocotools
 from pycocotools.coco import COCO
 import skimage.io as io
-from config import Constants, Hyper
+from config import Constants, Hyper, Global_Variable
 
 # dataset interface takes the ids of the COCO classes
 class COCOData(data.Dataset):
@@ -42,7 +42,15 @@ class COCOData(data.Dataset):
 
     # downloadthe image 
     # return rgb image
-    def load_img(self, idx): 
+    def load_img_via_file(self, idx): 
+        dir = Constants.train_data_folder if Global_Variable.is_train else Constants.val_data_folder
+        coco_file_name = self.img_data[idx]['file_name']
+        coco_file_path = os.path.join(dir, coco_file_name)
+        im = np.array(io.imread(coco_file_path))
+        im = self.transform(im)
+        return im
+
+    def load_img_via_url(self, idx): 
         coco_url = self.img_data[idx]['coco_url']
         im = np.array(io.imread(coco_url))
         im = self.transform(im)
@@ -81,9 +89,12 @@ class COCOData(data.Dataset):
 
     # return image + label 
     def __getitem__(self, idx):
-         X = self.load_img(idx)
-         y = self.load_label(idx) 
-         return X,y
+        if Hyper.is_url_read:
+            X = self.load_img_via_url(idx)
+        else:
+            X = self.load_img_via_file(idx)
+        y = self.load_label(idx) 
+        return X,y
 
     def test_interface_with_single_image(self, image_id):
         ann_ids = self.coco_interface.loadAnns(image_id)

@@ -17,12 +17,11 @@ def save_checkpoint(checkpoint):
     print("=> Saving checkpoint")
     T.save(checkpoint, Constants.backup_model_path)
 
-
 def load_checkpoint(model, optimizer):
     print("=> Loading checkpoint")
 
     checkpoint = T.load(Constants.backup_model_path)
-    model.load_state_dict(checkpoint["state_dict"])
-    optimizer.load_state_dict(checkpoint["optimizer"])
-    step = checkpoint["step"]
-    return step
+    model.load_state_dict(checkpoint["model_state_dict"])
+    optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+    epoch = checkpoint["epoch"]
+    return epoch

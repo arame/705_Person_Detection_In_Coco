@@ -4,6 +4,7 @@ class Hyper:
     total_epochs = 1
     learning_rate = 1e-6
     batch_size = 1
+    is_url_read = False
 
     [staticmethod]   
     def display():
@@ -23,4 +24,9 @@ class Constants:
     data_folder = "../mscoco/annotations"
     images_train_file = "instances_train2017.json"
     images_val_file = "instances_val2017.json"
+    train_data_folder = "../mscoco/train2017"
+    val_data_folder = "../mscoco/val2017"
+
+class Global_Variable:
+    is_train = True
 

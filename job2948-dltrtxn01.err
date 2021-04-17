@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "main.py", line 28, in <module>
+    main()
+  File "main.py", line 17, in main
+    train()
+  File "/home/enterprise.internal.city.ac.uk/adbb286/705/cwk/src/train.py", line 97, in train
+    loss = fasterrcnn_model(images, targets)
+  File "/home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torch/nn/modules/module.py", line 541, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torchvision/models/detection/generalized_rcnn.py", line 51, in forward
+    proposals, proposal_losses = self.rpn(images, features, targets)
+  File "/home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torch/nn/modules/module.py", line 541, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torchvision/models/detection/rpn.py", line 411, in forward
+    boxes, scores = self.filter_proposals(proposals, objectness, images.image_sizes, num_anchors_per_level)
+  File "/home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torchvision/models/detection/rpn.py", line 336, in filter_proposals
+    keep = box_ops.batched_nms(boxes, scores, lvl, self.nms_thresh)
+  File "/home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torchvision/ops/boxes.py", line 72, in batched_nms
+    keep = nms(boxes_for_nms, scores, iou_threshold)
+  File "/home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torchvision/ops/boxes.py", line 33, in nms
+    return _C.nms(boxes, scores, iou_threshold)
+RuntimeError: CUDA error: no kernel image is available for execution on the device (nms_cuda at /tmp/pip-req-build-8d3_7_rq/torchvision/csrc/cuda/nms_cuda.cu:127)
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) + 0x6d (0x7fc3c3578e7d in /home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torch/lib/libc10.so)
+frame #1: nms_cuda(at::Tensor const&, at::Tensor const&, float) + 0x8d1 (0x7fc393b29e96 in /home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torchvision/_C.so)
+frame #2: nms(at::Tensor const&, at::Tensor const&, float) + 0x183 (0x7fc393aede9f in /home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torchvision/_C.so)
+frame #3: <unknown function> + 0x79cbd (0x7fc393b07cbd in /home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torchvision/_C.so)
+frame #4: <unknown function> + 0x76578 (0x7fc393b04578 in /home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torchvision/_C.so)
+frame #5: <unknown function> + 0x70ce6 (0x7fc393afece6 in /home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torchvision/_C.so)
+frame #6: <unknown function> + 0x70f8a (0x7fc393afef8a in /home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torchvision/_C.so)
+frame #7: <unknown function> + 0x5be18 (0x7fc393ae9e18 in /home/enterprise.internal.city.ac.uk/adbb286/.conda/envs/alex2021/lib/python3.6/site-packages/torchvision/_C.so)
+<omitting python frames>
+
