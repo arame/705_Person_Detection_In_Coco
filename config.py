@@ -19,8 +19,8 @@ class Constants:
     selected_category = 'person'
     load_model = False
     save_model = True
-    backup_model_folder = "../backup"
-    backup_model_path = "../backup/model.pth"
+    backup_model_folder = "../backup_coco"
+    backup_model_path = "../backup_coco/model.pth"
     data_folder = "../mscoco/annotations"
     images_train_file = "instances_train2017.json"
     images_val_file = "instances_val2017.json"
